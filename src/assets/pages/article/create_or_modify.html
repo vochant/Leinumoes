@@ -1,0 +1,88 @@
+<link rel="stylesheet" href="/file/css/markdown-palettes.css">
+<script src="/file/js/markdown-palettes.min.js"></script>
+
+<script>
+    $(document).ready(() => {
+        window.markdownEditor = new MarkdownPalettes("#article-content")
+        <% if (isModify) { %>
+            markdownEditor.content = <%- JSON.stringify(originalContent) %>
+        <% } %>
+
+        $("#post").click(() => {
+            let data = packData()
+            if (!data) return
+            $.post('/articles/api', {
+                method: '<%= isModify ? 'modify' : 'create' %>',
+                ...data
+            }, (data, status) => {
+                if (data.error) {
+                    mdui.snackbar(`错误：${data.error}`)
+                } else {
+                    mdui.snackbar('操作成功！')
+                    location.href = `/articles/${data.id}`
+                }
+            })
+        })
+    })
+
+    function packData() {
+        let obj = {
+            <% if (isModify) { %>
+                id: <%= articleId %>,
+            <% } %>
+            divide: <%= div.id %>,
+            title: $('#title').val(),
+            content: markdownEditor.content
+        }
+
+        if (!obj.title || !obj.content) {
+            mdui.snackbar('错误：标题和内容不能为空')
+            return null
+        }
+
+        return obj
+    }
+<% if (isModify) { %>
+    function removeArticle(id) {
+        mdui.confirm('确认要删除该文章吗？', () => {
+            $.post('/articles/api', { method: 'delete', id }, (data, status) => {
+                if (data.error) {
+                    mdui.snackbar(`错误：${data.error}`)
+                } else {
+                    mdui.snackbar('删除成功！')
+                    location.href = '/articles/manage?user=<%= author %>'
+                }
+            })
+        }, () => {})
+    }
+<% } %>
+</script>
+
+<div class="markdown-body">
+    <% if (isModify) { %>
+        <h1>编辑文章</h1>
+    <% } else { %>
+        <h1>创建文章</h1>
+    <% } %>
+
+    <strong>分区：<a href="/articles/div/<%= div.id %>"><%= div.name %></a></strong><br>
+    <span style="color:rgba(0,0,0,0.6)">该字段无法修改。如需指定分区，请前往对应分区下。</span>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">文章标题</label>
+	<input class="mdui-textfield-input" type="text" id="title" <% if (isModify) { %>value="<%= originalTitle %>"<% } %>/>
+</div>
+
+<label class="mdui-textfield-label">文章内容</label>
+<div id="editor-container" style="height: 480px;">
+    <div id="article-content"></div>
+</div>
+
+<br><br>
+
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="post">发表</a>
+<% if (isModify) { %>
+&nbsp;
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-red" href="javascript:removeArticle(<%= articleId %>)">删除</a>
+<% } %>

@@ -1,0 +1,92 @@
+<%
+    function getIndexes(total, current) {
+        let before = [], after = []
+        for (let i = 1; current - (i >> 1) > 1; i <<= 1) before.push(Math.max(1, current - i))
+        for (let i = 1; current + (i >> 1) < total; i <<= 1) after.push(Math.min(total, current + i))
+        return before.reverse().concat(current).concat(after)
+    }
+
+    let currentPage = getItems(uid, page), indexes = getIndexes(pages, page)
+%>
+
+<% if (user.logged) { %>
+    <script>
+        function change_follow_ex(id) {
+            let ori_following = $(`#button-${id}`).attr('following') == 'yes'
+            let ori_followed = $(`#button-${id}`).attr('followed') == 'yes'
+
+            $.post("/user/api", {
+                method: ori_following ? 'unfollow' : 'follow',
+                user: id
+            }, (data, status) => {
+                if (data.error !== undefined) {
+                    mdui.snackbar(`错误：${data.error}`)
+                } else {
+                    mdui.snackbar("更新成功！");
+                    if (ori_following) {
+                        $(`#button-${id}`).html("关注").attr('following', 'no')
+                    } else {
+                        $(`#button-${id}`).html(ori_followed ? '已互关' : '已关注').attr('following', 'yes')
+                    }
+                }
+            })
+        }
+    </script>
+<% } %>
+
+<ul class="mdui-list">
+    <% for (let i in currentPage) { %>
+        <li class="mdui-list-item">
+            <%
+                let data = getPublic(currentPage[i])
+                if (!data.success) data.data = {
+                    id: user.op ? currentPage[i] : -1,
+                    displayName: '已注销用户' + (user.op ? (' (' + currentPage[i] + ')') : ''),
+                    avator: '/file/default_icon.png'
+                }
+                else data.data.avator = '/usericon/' + currentPage[i] + '.png'
+
+                let followed = false, following = false
+
+                if (data.success) {
+                    followed = helper.isFollowed(currentPage[i], user.id)
+                    following = helper.isFollowed(user.id, currentPage[i])
+                }
+            %>
+            <a class="mdui-list-item-avatar" href="/user/<%= data.data.id %>">
+                <img src="<%= data.data.avator %>"/>
+            </a>
+            <a class="mdui-list-item-content" href="/user/<%= data.data.id %>">
+                <%= data.data.displayName %>
+                <% if (typeof data.data.tag !== 'undefined') { %>
+                    <span class="user-tag"><%= data.data.tag %></span>
+                <% } %>
+            </a>
+            <% if (user.logged && data.success && data.data.id != user.id) { %>
+                <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="button-<%= currentPage[i] %>" followed="<%= followed ? 'yes' : 'no' %>" following="<%= following ? 'yes' : 'no' %>" href="javascript:change_follow_ex(<%= currentPage[i] %>)">
+                    <% if (following) { %>
+                        <% if (followed) { %>
+                            已互关
+                        <% } else { %>
+                            已关注
+                        <% } %>
+                    <% } else { %>
+                        关注
+                    <% } %>
+                </a>
+            <% } %>
+        </li>
+    <% } %>
+</ul>
+
+<a class="mdui-btn mdui-btn-icon mdui-ripple" <% if (page == 1) { %>disabled<% } else { %>href="<%= page - 1%>"<% } %> >
+	<i class="mdui-icon material-icons">chevron_left</i>
+</a>
+<% for (let i in indexes) { %>
+    <a class="mdui-btn mdui-btn-icon mdui-ripple<% if (indexes[i] == page) { %> mdui-color-theme-accent<% } %>" href="<%= indexes[i] %>">
+        <small><%= indexes[i] %></small>
+    </a>
+<% } %>
+<a class="mdui-btn mdui-btn-icon mdui-ripple" <% if (page == pages) { %>disabled<% } else { %>href="<%= page + 1%>"<% } %> >
+	<i class="mdui-icon material-icons">chevron_right</i>
+</a>

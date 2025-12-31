@@ -1,0 +1,6 @@
+{
+    "title": "帮助",
+    "sections": [
+        {"file": "help.md", "type": "markdown"}
+    ]
+}

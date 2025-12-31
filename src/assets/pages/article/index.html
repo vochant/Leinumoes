@@ -1,0 +1,240 @@
+<div class="mdui-text-center mdui-text-color-purple-600">
+    <h1 id="title-container" class="mdui-center"><strong id="title"></strong></h1>
+</div>
+
+<link href="/file/css/slick.css" rel="stylesheet" />
+<link href="/file/css/slick-theme.css" rel="stylesheet" />
+<script src="/file/js/slick.min.js"></script>
+
+<style>
+    #title::after {
+        content: "|";
+        display: inline-block;
+        vertical-align: top;
+        font-weight: lighter;
+        animation: flicker .5s infinite;
+    }
+
+    @keyframes flicker {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+    #title-container {
+        padding: 8px 16px;
+        color: inherit;
+        border-left: 0.25em solid;
+        border-right: 0.25em solid;
+        border-color: #8e24aa;
+        width: 90%;
+        font-size: calc(90vw / 32);
+    }
+
+    @media (min-width: 640px) {
+        #title-container {
+            width: 80%;
+            font-size: calc(80vw / 32)
+        }
+    }
+
+    @media (min-width: 1024px) {
+        #title-container {
+            width: 70%;
+            font-size: calc(70vw / 32)
+        }
+    }
+</style>
+
+<script>
+	const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+	_f = async () => {
+		var s = [
+			"欢迎访问 Leinumoes 论坛",
+            "歡迎訪問 Leinumoes 論壇",
+            "Welcome to the Leinumoes Forum",
+            "Leinumoesフォーラムへようこそ",
+            "Leinumoes 포럼에 오신 것을 환영합니다",
+            "Bienvenue sur le forum Leinumoes",
+            "Willkommen im Leinumoes-Forum",
+            "Bienvenido al Foro Leinumoes",
+            "Benvenuti al forum di Leinumoes",
+            "Добро пожаловать на форум Leinumoes",
+            "Καλώς ορίσατε στο φόρουμ Leinumoes",
+            "Leinumoes 之坛，致意于汝",
+            "Leinumoes 議の所へ来たるを悦び迎ふ",
+            "Leinumoes 議談處에 오시니, 歡迎하옵나이다",
+            "Salvete ad forum Leinumoes!",
+            "Wilcuma tō Leinumoes ġesprecstede",
+            "Εὐπρόσδεκτοι εἰς τὸν σύλλογον Leinumoes",
+            "Добро пріити на собраніє Leinumoes",
+            "Bonvenon al la Forumo de Leinumoes",
+            "sina kama pona tawa kulupu toki Leinumoes",
+            "mi gleki lo nu do klama lo tavlytergu'i be Leinumoes",
+            "Chào mừng đến với Diễn đàn Leinumoes",
+            "Ласкаво просимо на форум Leinumoes",
+            "Hontuvak o lepip o Leinumoes tésós",
+            "Bem-vindo ao Fórum Leinumoes",
+            "ยินดีต้อนรับสู่ฟอรั่ม Leinumoes",
+            "Selamat datang ke Forum Leinumoes",
+            "Tervetuloa Leinumoes-foorumille",
+            "Leinumoes Forum'a hoş geldiniz",
+            "Leinumoes ဖိုရမ်မှလှိုက်လှဲစွာကြိုဆိုပါသည်။",
+            "Welkom op het Leinumoes Forum",
+            "Välkommen till Leinumoes-forumet",
+            "Maligayang pagdating sa Leinumoes Forum",
+            "Walasye em taso veta Leinumoes narul=kommunikat",
+            "Sontufasten lefenis Leinumoes búnfassaus"
+		]
+		var i = 0
+		while(true) {
+			for (var j = 1; j <= s[i].length; j++) {
+				$('#title').text(s[i].slice(0, j))
+				await sleep(100)
+			}
+			await sleep(650)
+			for (var j = s[i].length - 1; j >= 0; j--) {
+				$('#title').text(s[i].slice(0, j))
+				await sleep(50)
+			}
+			i = (i == s.length - 1) ? 0 : (i + 1)
+		}
+	}
+	setTimeout(_f, 1000);
+</script>
+
+<div class="mdui-center mdui-text-center cond-thin">
+    <div class="slick-container mdui-shadow-2">
+        <% const kawaii = ['announcement.png', 'joinus.png']; for (let i in kawaii) { let e = kawaii[i]; %>
+            <div>
+                <img class="mdui-img-fluid" src="/file/static/<%= e %>" alt="<%= e %>" />
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    $('.slick-container').slick({
+        autoplay: true,
+        autoplaySpeed: 7500,
+        dots: true
+    })
+</script>
+
+<div class="mdui-container cond-thin" style="margin: 0 auto; display: flex; align-items: center; gap: 8px;">
+    <div class="mdui-textfield" style="flex: 1;">
+        <i class="mdui-icon material-icons">search</i>
+        <input class="mdui-textfield-input" type="text" id="searchInput" placeholder="搜索文章标题或内容" />
+    </div>
+    <a id="search" href="javascript:void(0)" class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200">搜索</a>
+</div>
+
+<script>
+    function goSearch() {
+        const query = $('#searchInput').val().trim()
+        if (query) window.location.href = '/articles/search?q=' + encodeURIComponent(query)
+    }
+
+    $('#search').on('click', goSearch)
+
+    $('#searchInput').on('keydown', function (e) {
+        if (e.key === 'Enter') goSearch()
+    })
+</script>
+
+<br>
+
+<div class="mdui-row-xs-1 mdui-row-md-2"> 
+    <div class="mdui-col">
+        <div style="margin:10px;padding:30px;border-radius:15px;" class="mrkn-container mdui-shadow-3">
+            <div class="markdown-body"><h1 class="mdui-text-center mdui-center">最新公告</h1></div>
+            <% if (anns.length > 0) { %>
+                <div style="min-height:150px">
+                    <div class="mdui-list">
+                        <% for (let i = 0; i < Math.min(8, anns.length); i++) { let ann = anns[i]; %>
+                            <div class="mdui-list-item">
+                                <a class="mdui-list-item-content" href="/articles/<%= ann.id %>">
+                                    <%= ann.title %>
+                                    <span class="mdui-float-right">
+                                        <strong style="color:<%= (ann.vote > 0) ? 'green' : ((ann.vote < 0) ? 'red' : 'gray')%>"><%= (ann.vote > 0 ? '+' : '') + ann.vote %></strong>,
+                                        <%= ann.ncomments %> 条评论
+                                    </span>
+                                </a>
+                            </div>
+                        <% } %>
+                    </div>
+                    <span class="mdui-center mdui-text-center markdown-body"><a href="/articles/div/<%= config.announcement %>">查看更多</a></span>
+                </div>
+            <% } else { %>
+                <div class="mdui-valign" style="min-height:150px;"><span class="mdui-center mdui-text-center">暂无公告</span></div>
+            <% } %>
+        </div>
+    </div>
+    <div class="mdui-col">
+        <div style="margin:10px;padding:30px;border-radius:15px;" class="mrkn-container mdui-shadow-3">
+            <div class="markdown-body"><h1 class="mdui-text-center mdui-center">置顶讨论</h1></div>
+            <% if (pins.length > 0) { %>
+                <div style="min-height:150px">
+                    <div class="mdui-list">
+                        <% for (let i = 0; i < Math.min(8, pins.length); i++) { let pin = pins[i]; %>
+                            <div class="mdui-list-item">
+                                <a class="mdui-list-item-content" href="/articles/<%= pin.id %>">
+                                    <%= pin.title %>
+                                    <span class="mdui-float-right">
+                                        <strong style="color:<%= (pin.vote > 0) ? 'green' : ((pin.vote < 0) ? 'red' : 'gray')%>"><%= (pin.vote > 0 ? '+' : '') + pin.vote %></strong>,
+                                        <%= pin.ncomments %> 条评论
+                                    </span>
+                                </a>
+                            </div>
+                        <% } %>
+                    </div>
+                    <span class="mdui-center mdui-text-center markdown-body"><a href="/articles/pinned">查看更多</a></span>
+                </div>
+            <% } else { %>
+                <div class="mdui-valign" style="min-height:150px;"><span class="mdui-center mdui-text-center">暂无置顶</span></div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<br><br>
+<div class="mdui-typo-display-2"><span class="mdui-text-center mdui-center">最新帖子</span></div>
+<br>
+<% if (lats.length > 0) { %>
+    <div style="min-height:150px" class="markdown-body cond-thin mdui-center">
+        <hr>
+        <% for (let i = 0; i < Math.min(12, lats.length); i++) { let lat = lats[i]; %>
+            <a href ="/articles/<%= lat.id %>"><%= lat.title %></a>
+            <i class="mdui-text-color-theme-secondary">from</i> <a href="/articles/div/<%= lat.divide %>"><%= lat.dname %></a><br>
+            <i class="mdui-text-color-theme-secondary">by</i> <a href="/user/<%= lat.author %>"><%= lat.display_name %></a>
+            <span class="mdui-float-right">
+                <%= lat.created_at %>, <strong style="color:<%= (lat.vote > 0) ? 'green' : ((lat.vote < 0) ? 'red' : 'gray')%>"><%= (lat.vote > 0 ? '+' : '') + lat.vote %></strong>,
+                <%= lat.ncomments %> 条评论
+            </span>
+            <br><hr>
+        <% } %>
+        <span class="mdui-center mdui-text-center markdown-body"><a href="/articles/all">查看更多</a></span>
+    </div>
+<% } else { %>
+    <div class="mdui-valign" style="min-height:150px;"><span class="mdui-center mdui-text-center">暂无讨论</span></div>
+<% } %>
+<br><br>
+<div class="mdui-typo-display-2"><span class="mdui-text-center mdui-center">浏览分区</span></div>
+<br>
+<div class="mdui-row-xs-2 mdui-row-md-3 mdui-row-lg-4 mdui-typo">
+    <% for (let i = 0; i < divs.length; i++) { let div = divs[i]; %>
+        <div class="mdui-col">
+            <div style="margin:10px;">
+                <div class="mdui-card mdui-hoverable">
+                    <div class="mdui-card-primary">
+                        <div class="mdui-card-primary-title"><a href="/articles/div/<%= div.id %>"><%= div.name %></a></div>
+                        <div class="mdui-card-primary-subtitle"><%= div.desc || '暂无描述' %></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>

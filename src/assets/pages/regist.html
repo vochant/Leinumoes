@@ -1,0 +1,66 @@
+<script>
+	$(document).ready(() => {
+		$("#regist").click(() => {
+			if ($("#name").val() == "" || $("#password").val() == "") {
+				mdui.alert("用户名、密码不得为空！", "错误")
+				return
+			}
+			if ($("#password").val() != $("#passwd2").val()) {
+				mdui.alert("两次输入的密码不相同！", "错误")
+				return
+			}
+            if (!$('#eula').is(':checked')) {
+                mdui.alert("请先阅读并同意《最终用户许可协议》！", "错误")
+				return
+            }
+            let data = {
+				user: $("#name").val(),
+				passwd: $("#password").val(),
+				method: "regist"
+			}
+            <% if (config.invite) { %>
+            if (!$("#invitecode").val()) {
+                mdui.alert("请输入邀请码！", "错误")
+                return
+            }
+            data.invite = $("#invitecode").val()
+            <% } %>
+			$.post("/userapi", data, (data, status) => {
+				if (data.error) {
+					$('#error').text(data.error)
+				}
+				else window.location.pathname = "/settings/profile"
+			})
+		})
+	})
+</script>
+<div class="mdui-typo">
+	<h1>注册</h1>
+</div>
+<div class="mdui-textfield mdui-textfield-floating-label">
+	<label class="mdui-textfield-label" for="name">用户名</label>
+	<input class="mdui-textfield-input" type="text" id="name"/>
+</div>
+<div class="mdui-textfield mdui-textfield-floating-label">
+	<label class="mdui-textfield-label" for="password">密码</label>
+	<input class="mdui-textfield-input" type="password" id="password"/>
+</div>
+<div class="mdui-textfield mdui-textfield-floating-label">
+	<label class="mdui-textfield-label" for="passwd2">重复密码</label>
+	<input class="mdui-textfield-input" type="password" id="passwd2"/>
+</div>
+<% if (config.invite) { %>
+    <div class="mdui-textfield mdui-textfield-floating-label">
+        <label class="mdui-textfield-label" for="invitecode">邀请码</label>
+        <input class="mdui-textfield-input" type="text" id="invitecode"/>
+    </div>
+<% } %>
+<label class="mdui-checkbox mdui-typo" for="eula">
+  <input type="checkbox" id="eula"/>
+  <i class="mdui-checkbox-icon"></i>
+  我已阅读并同意<a href="/docs/eula">《最终用户许可协议》</a>
+</label>
+<br>
+<a id="regist" class="mdui-btn mdui-btn-raised mdui-color-theme-200 mdui-ripple mdui-ripple-white">注册</a><br>
+<div class="mdui-typo" style="color: #f00;" id="error"></div><br>
+<div class="mdui-typo"><a href="/login">用户登录</a></div>

@@ -1,0 +1,100 @@
+<% 
+    function getIndexes(total, current) {
+        let before = [], after = []
+        for (let i = 1; current - (i >> 1) > 1; i <<= 1) before.push(Math.max(1, current - i))
+        for (let i = 1; current + (i >> 1) < total; i <<= 1) after.push(Math.min(total, current + i))
+        return before.reverse().concat(current).concat(after)
+    }
+
+    let pages = Math.max(articles / 20, 1)
+    let indexes = getIndexes(pages, page)
+%>
+
+<script>
+    function delete_article(aid) {
+        mdui.confirm('确定要删除文章吗？', () => {
+            $.post('/articles/api', {
+                method: 'delete',
+                aid
+            }, (data, status) => {
+                if (data.error) {
+                    mdui.snackbar(`错误：${data.error}`)
+                }
+                else location.reload()
+            })
+        })
+    }
+
+    function change_locked(aid) {
+        let prevLocked = $(`#item-${aid}`).attr('locked') == 'yes'
+        $.post('/articles/api', {
+            method: 'lock',
+            aid,
+            locked: 1 - prevLocked
+        }, (data, status) => {
+            if (data.error) {
+                mdui.snackbar(`错误：${data.error}`)
+            }
+            else {
+                $(`#item-${aid}`).html(prevLocked ? '锁定' : '解锁').attr('locked', prevLocked ? 'no' : 'yes')
+            }
+        })
+    }
+</script>
+
+<div class="mdui-typo">
+    <h1>管理文章</h1>
+</div>
+<br>
+
+<% if (managed_user == user.id) { %>
+    <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="/articles/new?div=1">
+        创建文章
+    </a>
+    <br><br>
+<% } %>
+
+<div class="mdui-typo"><hr><br></div>
+
+<ul class="mdui-list">
+    <% for (let i in currentPage) { let art = currentPage[i] %>
+        <li class="mdui-list-item">
+            <div class="mdui-list-item-content">
+                <a href="/articles/<%= art.id %>" class="no-typo"><%= art.title %></a>
+                <div class="mdui-chip">
+                    <a class="mdui-chip-title" href="/articles/div/<%= art.divide %>">
+                        <%= art.dname %>
+                    </a>
+                </div>
+                <span style="color:rgba(0,0,0,0.6)">
+                    发布时间：<%= art.created_at %>，最近更新时间：<%= art.updated_at %>
+                </span>
+            </div>
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="item-<%= art.id %>" locked="<%= art.locked ? 'yes' : 'no' %>" href="javascript:change_locked(<%= art.id %>)">
+                <% if (art.locked) { %>
+                    解锁
+                <% } else { %>
+                    锁定
+                <% } %>
+            </a>
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="/articles/<%= art.id %>/edit">
+                编辑
+            </a>
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-red" href="javascript:delete_article(<%= art.id %>)">
+                删除
+            </a>
+        </li>
+    <% } %>
+</ul>
+
+<a class="mdui-btn mdui-btn-icon mdui-ripple" <% if (page == 1) { %>disabled<% } else { %>href="manage?user=<%= managed_user %>&page=<%= page - 1%>"<% } %> >
+	<i class="mdui-icon material-icons">chevron_left</i>
+</a>
+<% for (let i in indexes) { %>
+    <a class="mdui-btn mdui-btn-icon mdui-ripple<% if (indexes[i] == page) { %> mdui-color-theme-accent<% } %>" href="manage?user=<%= managed_user %>&page=<%= indexes[i] %>">
+        <small><%= indexes[i] %></small>
+    </a>
+<% } %>
+<a class="mdui-btn mdui-btn-icon mdui-ripple" <% if (page == pages) { %>disabled<% } else { %>href="manage?user=<%= managed_user %>&page=<%= page + 1%>"<% } %> >
+	<i class="mdui-icon material-icons">chevron_right</i>
+</a>

@@ -1,0 +1,7 @@
+{
+    "title": "MIT License",
+    "sections": [
+        {"file": "mit.html", "type": "html"},
+        {"file": "mit.md", "type": "markdown"}
+    ]
+}

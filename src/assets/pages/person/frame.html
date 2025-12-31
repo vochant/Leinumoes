@@ -1,0 +1,126 @@
+<%
+    let following = helper.isFollowed(user.id, info.id)
+    let followed = helper.isFollowed(info.id, user.id)
+    let blocked = helper.isBlocked(user.id, info.id)
+    let followers = helper.countFollower(info.id)
+%>
+
+<% if (user.logged && user.id != info.id) { %>
+    <script>
+        window.followed = <%= following ? "true" : "false" %>
+        window.blocked = <%= blocked ? "true" : "false" %>
+        window.followers = <%= followers %>
+        function change_follow(uid) {
+            $.post("/user/api", {
+                method: window.followed ? 'unfollow' : 'follow',
+                user: uid,
+            }, (data, status) => {
+                if (data.error !== undefined) {
+                    mdui.snackbar(`错误：${data.error}`)
+                } else {
+                    mdui.snackbar("更新成功！");
+                    window.followed = !window.followed;
+                    if (window.followed) {
+                        $("#follow")[0].innerHTML = "<%= followed ? "已互关" : "已关注"  %>"
+                        window.followers++
+                    } else {
+                        $("#follow")[0].innerHTML = "关注"
+                        window.followers--
+                    }
+                    $("#fans")[0].innerHTML = "<strong>粉丝</strong> " + window.followers
+                }
+            })
+        }
+        function change_block(uid) {
+            $.post("/user/api", {
+                method: window.blocked ? 'unblock' : 'block',
+                user: uid
+            }, (data, status) => {
+                if (data.error !== undefined) {
+                    mdui.snackbar(`错误：${data.error}`)
+                } else {
+                    mdui.snackbar("更新成功！")
+                    window.blocked = !window.blocked
+                    if (window.blocked) {
+                        $("block")[0].innerHTML = "已屏蔽"
+                    } else {
+                        $("block")[0].innerHTML = "屏蔽"
+                    }
+                    if (window.followed) {
+                        window.followed = false
+                        window.followers--
+                        $("#fans")[0].innerHTML = "<strong>粉丝</strong> " + window.followers
+                        $("#follow")[0].innerHTML = "关注"
+                    }
+                }
+            })
+        }
+    </script>
+<% } %>
+
+<style>
+	.my-card-text {
+		display: block;
+		margin-left: 65px;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+	.header-media {
+		max-height: 250px;
+	}
+</style>
+
+<div class="mdui-card">
+	<div class="mdui-card-media" style="min-height:180px;">
+		<img src="/file/userbg.png" class="header-media" style="height:100vh">
+		<div class="mdui-card-media-covered">
+			<div class="mdui-card-primary">
+				<img height="60px" style="width:60px!important;position:absolute;" class="mdui-img-circle mdui-img" src="/usericon/<%= info.id %>.png">
+				<div class="mdui-card-primary-title my-card-text">
+                    <%= info.fullName %>
+                    <% if (typeof info.tag !== 'undefined') { %>
+                        <a class="user-tag"><%= info.tag %></a>
+                    <% } %>
+                </div>
+				<div class="mdui-card-primary-subtitle my-card-text">
+					<% if (typeof info.bio !== 'undefined') { %>
+                        <%= info.bio %>
+                    <% } else { %>
+                        这个人很神秘，并没有写下什么。
+                    <% } %>
+					<br>
+					<a href="/user/<%= info.id %>/following" style="text-decoration:none;color:white;"><strong>关注</strong> <%= helper.countFollowing(info.id) %></a>&nbsp;&nbsp;&nbsp;
+					<a href="/user/<%= info.id %>/follower" style="text-decoration:none;color:white;" id="fans"><strong>粉丝</strong> <%= helper.countFollower(info.id) %></a>
+				</div>
+			</div>
+			<div class="mdui-card-actions">
+				<% if (user.logged && user.id != info.id) { %>
+					<a class="mdui-btn mdui-ripple mdui-ripple-white" id="follow" href="javascript:change_follow(<%= info.id %>)">
+						<% if (helper.isFollowed(user.id, info.id)) { %>
+							<% if (helper.isFollowed(info.id, user.id)) { %>
+								已互关
+							<% } else { %>
+								已关注
+							<% } %>
+						<% } else { %>
+							关注
+						<% } %></a>
+					<a class="mdui-btn mdui-ripple mdui-ripple-white" href="/message/user/<%= info.id %>">私信</a>
+					<a class="mdui-btn mdui-ripple mdui-ripple-white" id="block" href="javascript:change_block(<%= info.id %>)"><% if (helper.isBlocked(user.id, info.id)) { %>已屏蔽<% } else { %>屏蔽<% } %></a>
+				<% } else if (user.logged) { %>
+					<a class="mdui-btn mdui-ripple mdui-ripple-white" href="/settings/">设置</a>
+				<% } %>
+				<a class="mdui-btn mdui-ripple mdui-ripple-white" href="/blog/<%= info.id %>">个人博客</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="mdui-tab">
+	<a href="/user/<%= info.id %>" class="mdui-ripple">介绍</a>
+	<a href="/user/<%= info.id %>/articles" class="mdui-ripple">内容</a>
+	<a href="/user/<%= info.id %>/activities" class="mdui-ripple">动态</a>
+</div>
+
+<%- page %>

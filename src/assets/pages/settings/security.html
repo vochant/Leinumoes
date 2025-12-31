@@ -1,0 +1,62 @@
+<script>
+	$(document).ready(() => {
+        $("#update").click(() => {
+			const auth = $("#old_password").val()
+            if (auth === '') {
+                mdui.snackbar('错误：请填写原密码！')
+                return
+            }
+            let obj = { auth }
+            const password = $("#password").val()
+            if (password !== '') {
+                if ($("#repeat_password").val() !== password) {
+                    mdui.snackbar('错误：两次输入密码不一致！')
+                    return
+                }
+                obj.password = password
+            }
+            const username = $("#username").val()
+            if (username !== '') obj.username = username
+            if (obj.password || obj.username) {
+                $.post("/settings/security_api", obj, (data, status) => {
+                    if (data.error) mdui.snackbar(`错误：${data.error}`)
+				    else mdui.snackbar("更新成功！")
+                })
+            }
+            else {
+                mdui.snackbar('错误：请填写一些字段！')
+            }
+		})
+	})
+</script>
+
+<div class="mdui-typo">
+	<h1>设置</h1><br>
+	<a href="/settings/">基础信息</a> | <a href="/settings/social">社会信息</a> | 安全设置 | <a href="/settings/blog">博客设置</a><br>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label"><span style="color:red">*</span>原密码</label>
+	<input class="mdui-textfield-input" type="password" id="old_password"/>
+</div>
+
+<br>以下若不更改则不填写。<br>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">新用户名</label>
+	<input class="mdui-textfield-input" type="text" id="username"/>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">新密码</label>
+	<input class="mdui-textfield-input" type="password" id="password"/>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">重复密码</label>
+	<input class="mdui-textfield-input" type="password" id="repeat_password"/>
+</div>
+
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="update">更新</a>
+
+<br>

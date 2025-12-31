@@ -1,0 +1,8 @@
+{
+    "login_first": "请先登录",
+    "logout_first": "请先退出登录",
+    "no_op": "您不是管理员",
+    "permission_denied": "您无权访问该内容",
+    "not_found": "您访问的内容不存在",
+    "invalid_user": "该用户不存在"
+}

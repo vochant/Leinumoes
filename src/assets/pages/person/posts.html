@@ -1,0 +1,3 @@
+<% if (hasGrant(user.id, info.id)) { %>
+    <a class="mdui-btn mdui-ripple mdui-ripple-white" href="/articles/manage?user=<%= info.id %>">管理文章</a>
+<% } %>

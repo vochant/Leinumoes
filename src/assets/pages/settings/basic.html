@@ -1,0 +1,74 @@
+<link rel="stylesheet" href="/file/css/markdown-palettes.css">
+<script src="/file/js/markdown-palettes.min.js"></script>
+
+<script>
+	function selectImg(source) {
+		var file = source.files[0]
+		if (window.FileReader) {
+			var fr = new FileReader()
+			fr.onloadend = function(e) {
+				$("#my_img")[0].src = e.target.result
+				window.img = e.target.result
+			}
+			fr.readAsDataURL(file)
+		}
+	}
+	function sendImg() {
+        if (!window.img) {
+            mdui.snackbar('错误：未选择文件')
+            return
+        }
+		var obj = {image: window.img}
+		$.post("/settings/api_avatar", obj, (data, status) => {
+			if (data.error) {
+				mdui.snackbar(`错误：${data.error}`)
+			} else {
+				$("#my_img")[0].src = "/usericon/<%= info.id %>.png"
+                window.img = null
+				mdui.snackbar("更新成功！")
+			}
+		})
+	}
+	$(document).ready(() => {
+		window.markdownEditor = new MarkdownPalettes("#desc")
+		markdownEditor.content = <%- JSON.stringify(desc) %>
+		$("#update").click(() => {
+			$.post("/settings/api", {
+                updates: [
+                    {id: "nickname", value: $("#nickname").val()},
+                    {id: "bio", value: $("#bio").val()},
+                    {id: "desc", value: markdownEditor.content}
+                ]
+            }, (data, status) => {
+				if (data.error) mdui.snackbar(`错误：${data.error}`)
+				else mdui.snackbar("更新成功！")
+			})
+		})
+    })
+</script>
+
+<div class="mdui-typo">
+	<h1>设置</h1><br>
+	基础信息 | <a href="/settings/social">社会信息</a> | <a href="/settings/security">安全设置</a> | <a href="/settings/blog">博客设置</a><br>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">昵称</label>
+	<input class="mdui-textfield-input" type="text" id="nickname" placeholder="<%= info.name %>" <% if (typeof info.nickname !== 'undefined') { %>value="<%= info.nickname %>"<% } %>/>
+</div>
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">签名</label>
+	<input class="mdui-textfield-input" type="text" id="bio" placeholder="这个人很懒，什么也没有留下。" <% if (typeof info.bio !== 'undefined') { %>value="<%= info.bio %>"<% } %>/>
+</div>
+<label class="mdui-textfield-label">个人简介</label>
+<div id="editor-container" style="height: 400px;">
+	<div id="desc"></div>
+</div><br>
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="update">更新全部</a>
+<div class="mdui-typo" style="color: #f00;" id="error"></div>
+<br><br>
+
+<label class="mdui-textfield-label">头像</label>
+<img class="mdui-img-fluid mdui-img-circle" src="/usericon/<%= info.id %>.png" title="头像" id="my_img" width="120px" height="120px"/><br>
+<input type="file" name="file" accept="image/*" id="file" onchange="selectImg(this);" /><br><br>
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:sendImg()">上传</a>

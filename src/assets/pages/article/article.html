@@ -1,0 +1,120 @@
+<%
+    let following = helper.isFollowed(user.id, art.author)
+    let followed = helper.isFollowed(art.author, user.id)
+%>
+
+<style>
+	.my-card-text {
+		display: block;
+		margin-left: 65px;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+</style>
+
+<% if (can_vote) { %>
+    <script>
+        window.vote_state = <%- vote %>;
+        window.vote_count = <%- art.vote %>;
+        function change_vote(aid, vote) {
+            let ovote = window.vote_state
+            let nvote = vote_state ? 0 : vote;
+            $.post('/articles/api_vote', { aid, vote: nvote }, (data, status) => {
+                if (data.error) {
+                    mdui.snackbar(`错误：${data.error}`)
+                } else {
+                    mdui.snackbar('投票成功！')
+                    window.vote_state = nvote
+                    window.vote_count += nvote - ovote
+                    $('#votec').text((window.vote_count > 0 ? '+' : '') + window.vote_count).attr('style', `color:${(window.vote_count > 0) ? 'green' : ((window.vote_count < 0) ? 'red' : 'gray')}`)
+                    if (nvote == 0) {
+                        $('#voted').attr('style', 'color:gray')
+                        $('#voteu').attr('style', 'color:gray')
+                    } else if (nvote == 1) {
+                        $('#voted').attr('style', 'color:gray')
+                        $('#voteu').attr('style', 'color:green')
+                    } else {
+                        $('#voted').attr('style', 'color:red')
+                        $('#voteu').attr('style', 'color:gray')
+                    }
+                }
+            })
+        }
+    </script>
+<% } %>
+
+<div class="mdui-typo">
+	<h1><%= art.title %></h1>
+    <div class="mdui-typo-subheading-opacity">发布时间：<%= art.created_at %>，最近更新时间：<%= art.updated_at %></div>
+</div>
+
+<% if (hasGrant(user.id, art.author)) { %>
+    <br>
+    <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="/articles/<%= art.id %>/edit">编辑文章</a>
+    <% if (user.op) { %>
+        &nbsp;&nbsp;<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-yellow" id="cglck" state="<%= art.locked ? 'yes' : 'no' %>" href="javascript:change_locked(<%= art.id %>)">
+            <% if (art.locked) { %>
+                解锁文章
+            <% } else { %>
+                锁定文章
+            <% } %>
+        </a>
+    <% } %>
+<% } %>
+
+<div class="mdui-card-primary">
+    <a <% if (art.user_name) { %>href="/user/<%= art.author %>"<% } %>>
+        <% if (art.user_name) { %>
+            <img height="60px" style="width:60px!important;position:absolute" class="mdui-img-circle mdui-img" src="/usericon/<%= art.author %>.png">
+        <% } %>
+    </a>
+    <div class="mdui-card-primary-title my-card-text">
+        <a style="text-decoration:none;color:black;" <% if (art.user_name) { %>href="/user/<%= art.author %>"<% } %> >
+            <%= art.user_name || ('已注销用户' + (user.op ? ` (${art.autuor})` : '')) %>
+            <% if (art.user_tag) { %>
+                <span class="user-tag"><%= art.user_tag %></span>
+            <% } %>
+        </a>
+    </div>
+    <div class="mdui-card-primary-subtitle my-card-text"><%= art.user_bio %></div>
+    <% if (user.logged && art.author != user.id) { %>
+        <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" style="position:absolute;top:32px;right:10px" href="javascript:change_follow(<%= art.author %>)">
+            <% if (following) { %>
+                <% if (followed) { %>
+                    已互关
+                <% } else { %>
+                    已关注
+                <% } %>
+            <% } else { %>
+                关注
+            <% } %>
+        </a>
+    <% } %>
+</div>
+
+<div class="mdui-typo"><hr></div>
+
+<br><br>
+
+<div class="markdown-body">
+    <%- markdown.render(art.content) %>
+</div>
+
+<br>
+
+<div>
+    <span class="mdui-text-center mdui-center">
+        <a id="voted" <%- vote == -1 ? 'style="color:red"' : 'style="color:gray"' %> href="javascript:change_vote(<%= art.id %>, -1)" class="mdui-btn mdui-btn-icon mdui-ripple" <%- !can_vote ? 'disabled' : '' %> >
+            <i class="mdui-icon material-icons">thumb_down</i>
+        </a>
+        &nbsp;&nbsp;<strong id="votec" style="color:<%= (art.vote > 0) ? 'green' : ((art.vote < 0) ? 'red' : 'gray')%>"><%= (art.vote > 0 ? '+' : '') + art.vote %></strong>&nbsp;&nbsp;
+        <a id="voteu" <%- vote == 1 ? 'style="color:green"' : 'style="color:gray"' %> href="javascript:change_vote(<%= art.id %>, 1)" class="mdui-btn mdui-btn-icon mdui-ripple" <%- !can_vote ? 'disabled' : '' %> >
+            <i class="mdui-icon material-icons">thumb_up</i>
+        </a>
+    </span>
+</div>
+
+<br>
+
+<%- include('comments.html') %>

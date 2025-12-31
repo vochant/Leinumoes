@@ -1,0 +1,186 @@
+<script>
+    function getGender() {
+        if ($('input[name="gender"][value="hidden"]').is(':checked')) return ''
+        if ($('input[name="gender"][value="male"]').is(':checked')) return '男'
+        if ($('input[name="gender"][value="female"]').is(':checked')) return '女'
+        return $('#input-gender').val()
+    }
+    function getPronoun() {
+        if ($('input[name="pronoun"][value="hidden"]').is(':checked')) return ''
+        if ($('input[name="pronoun"][value="he"]').is(':checked')) return 'he/him'
+        if ($('input[name="pronoun"][value="she"]').is(':checked')) return 'she/her'
+        if ($('input[name="pronoun"][value="they"]').is(':checked')) return 'they/them'
+        return $('#input-pronoun').val()
+    }
+	$(document).ready(() => {
+		$('input[name="gender"]').on('change', function () {
+            const isOther = $('input[name="gender"][value="other"]').is(':checked')
+            $('#input-gender').prop('disabled', !isOther)
+            mdui.updateTextFields($('#parent-gender').get(0))
+        })
+        $('input[name="pronoun"]').on('change', function () {
+            const isOther = $('input[name="pronoun"][value="other"]').is(':checked')
+            $('#input-pronoun').prop('disabled', !isOther)
+            mdui.updateTextFields($('#parent-pronoun').get(0))
+        })
+        $("#update").click(() => {
+			$.post("/settings/api", {
+                updates: [
+                    {id: 'email', value: $('#email').val()},
+                    {id: 'phone', value: $('#phone').val()},
+                    {id: 'birth', value: $('#birth').val()},
+                    {id: 'pronoun', value: getPronoun()},
+                    {id: 'gender', value: getGender()},
+                    {id: 'realname', value: $('#realname').val()},
+                    {id: 'job', value: $('#job').val()},
+                    {id: 'address', value: $('#address').val()},
+                    {id: 'url', value: $('#url').val()}<% if (user.op) { %>,
+                    {id: 'tag', value: $('#tag').val()}<% } %>
+                ]
+            }, (data, status) => {
+				if (data.error) mdui.snackbar(`错误：${data.error}`)
+				else mdui.snackbar("更新成功！")
+			})
+		})
+	})
+</script>
+
+<div class="mdui-typo">
+	<h1>设置</h1><br>
+	<a href="/settings/">基础信息</a> | 社会信息 | <a href="/settings/security">安全设置</a> | <a href="/settings/blog">博客设置</a><br>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">Email</label>
+	<input class="mdui-textfield-input" type="email" id="email" placeholder="ccf@ccf.org.cn" <% if (typeof info.email !== 'undefined') { %>value="<%= info.email %>"<% } %>/>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">电话号码</label>
+	<input class="mdui-textfield-input" type="tel" id="phone" placeholder="16000000000" <% if (typeof info.phone !== 'undefined') { %>value="<%= info.phone %>"<% } %>/>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">生日</label>
+	<input class="mdui-textfield-input" type="date" id="birth" placeholder="2007-06-29" <% if (typeof info.birth !== 'undefined') { %>value="<%= info.birth %>"<% } %>/>
+</div>
+<br>
+<form>
+	<label class="mdui-textfield-label">人称代词</label><br>
+
+    <%
+        let pron
+        
+        if (typeof info.pronoun !== 'undefined') pron = info.pronoun
+        else pron = ''
+
+        let pronOther = (pron != '' && pron != 'he/him' && pron != 'she/her' && pron != 'they/them')
+    %>
+
+	<label class="mdui-radio">
+		<input type="radio" name="pronoun" value="hidden" <%= pron == '' ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		不显示
+	</label><br>
+
+	<label class="mdui-radio">
+		<input type="radio" name="pronoun" value="he" <%= pron == 'he/him' ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		he/him
+	</label><br>
+
+	<label class="mdui-radio">
+		<input type="radio" name="pronoun" value="she" <%= pron == 'she/her' ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		she/her
+	</label><br>
+
+    <label class="mdui-radio">
+		<input type="radio" name="pronoun" value="they" <%= pron == 'they/them' ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		they/them
+	</label><br>
+
+	<label class="mdui-radio" style="display: inline-flex; align-items: center;">
+		<input type="radio" name="pronoun" value="other" <%= pronOther ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		自定义
+	</label>
+
+    <div class="mdui-textfield" id="parent-pronoun" style="margin-left: 36px;">
+        <input class="mdui-textfield-input" type="text" id="input-pronoun" placeholder="请填写" <% if (pronOther) { %>value="<%= pron %>"<% } else { %>disabled<% } %>/>
+    </div>
+</form>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">真实姓名</label>
+	<input class="mdui-textfield-input" type="text" id="realname" placeholder="明统若空" <% if (typeof info.realname !== 'undefined') { %>value="<%= info.realname %>"<% } %>/>
+</div>
+<br>
+<form>
+	<label class="mdui-textfield-label">性别</label><br>
+
+    <%
+        let gender
+        
+        if (typeof info.gender !== 'undefined') gender = info.gender
+        else gender = ''
+
+        let genderOther = (gender != '' && gender != '男' && gender != '女')
+    %>
+
+	<label class="mdui-radio">
+		<input type="radio" name="gender" value="hidden" <%= gender == '' ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		不显示
+	</label><br>
+
+	<label class="mdui-radio">
+		<input type="radio" name="gender" value="male" <%= gender == '男' ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		男
+	</label><br>
+
+	<label class="mdui-radio">
+		<input type="radio" name="gender" value="female" <%= gender == '女' ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		女
+	</label><br>
+
+	<label class="mdui-radio" style="display: inline-flex; align-items: center;">
+		<input type="radio" name="gender" value="other" <%= genderOther ? 'checked' : '' %>/>
+		<i class="mdui-radio-icon"></i>
+		其他
+	</label>
+
+    <div class="mdui-textfield" id="parent-gender" style="margin-left: 36px;">
+        <input class="mdui-textfield-input" type="text" id="input-gender" placeholder="请填写" <% if (genderOther) { %>value="<%= gender %>"<% } else { %>disabled<% } %>/>
+    </div>
+</form>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">职业</label>
+	<input class="mdui-textfield-input" type="text" id="job" placeholder="VTuber" <% if (typeof info.job !== 'undefined') { %>value="<%= info.job %>"<% } %>/>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">住址</label>
+	<input class="mdui-textfield-input" type="text" id="address" placeholder="浙江省 杭州市" <% if (typeof info.address !== 'undefined') { %>value="<%= info.address %>"<% } %>/>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">个人网站</label>
+	<input class="mdui-textfield-input" type="url" id="url" placeholder="https://www.noi.cn" <% if (typeof info.url !== 'undefined') { %>value="<%= info.url %>"<% } %>/>
+</div>
+
+<% if (user.op) { %>
+    <div class="mdui-textfield">
+        出于您对 Leinumoes 的贡献，特许您自选标签，将于部分场合显示在用户名后。
+        <label class="mdui-textfield-label">标签</label>
+        <input class="mdui-textfield-input" type="text" id="tag" placeholder="可爱" <% if (typeof info.tag !== 'undefined') { %>value="<%= info.tag %>"<% } %>/>
+    </div>
+<% } %>
+
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="update">更新</a>
+
+<br>

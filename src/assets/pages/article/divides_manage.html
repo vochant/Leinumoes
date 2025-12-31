@@ -1,0 +1,161 @@
+<div class="mdui-typo">
+    <h1>管理分类</h1>
+</div>
+<br>
+
+<script>
+    window.descs = (function() {
+        let obj = {}
+        <% for (let i in divides) { let div = divides[i]; %>
+            <%- `obj[${div.id}] = ${JSON.stringify(div.desc)}` %>
+        <% } %>
+        return obj
+    })()
+
+    function create_div() {
+        let title = $("#input").val()
+        if (title === '') {
+            mdui.snackbar('错误：标题不能为空')
+            return
+        }
+        $.post('/articles/div/api', {method: 'create', name: title}, (data, status) => {
+            if (data.error) {
+                mdui.snackbar(`错误：${data.error}`)
+            }
+            else {
+                let id = data.id
+                let content = `
+                    <a class="mdui-list-item-content" href="/articles/div/${id}">
+                        <span id="name-${id}">${title}</span>
+                        <span style="color:#f00" id="ann-${id}"></span>
+                    </a>
+                    <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:show_desc(${id})">
+                        加载描述
+                    </a>&nbsp;&nbsp;
+                    <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:apply_desc(${id}">
+                        更改描述
+                    </a>&nbsp;&nbsp;
+                    <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="cgann-${id}" state="no" href="javascript:change_ann(${id})">
+                        启用公告
+                    </a>&nbsp;&nbsp;
+                    <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:rename_div(${id})">
+                        重命名
+                    </a>&nbsp;&nbsp;
+                    <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-red" href="javascript:remove_div(${id})">
+                        删除
+                    </a>
+                `
+                let li = document.createElement('li')
+                li.setAttribute('class', 'mdui-list-item')
+                li.setAttribute('id', `div-${id}`)
+                li.innerHTML = content
+                document.getElementById('divides').appendChild(li)
+                mdui.snackbar('创建成功')
+                window.descs[id] = ''
+            }
+        })
+    }
+
+    function show_desc(id) {
+        let content = window.descs[id]
+        if (content !== undefined) $("#input").val(content)
+        else mdui.snackbar('错误：未定义的项')
+    }
+
+    function apply_desc(id) {
+        let desc = $("#input").val()
+        $.post('/articles/div/api', {method: 'desc', id, desc}, (data, status) => {
+            if (data.error) {
+                mdui.snackbar(`错误：${data.error}`)
+            }
+            else {
+                mdui.snackbar('更新成功')
+                window.descs[id] = desc
+            }
+        })
+    }
+
+    function change_ann(id) {
+        let annstate = $(`#cgann-${id}`).prop('state') == 'yes'
+        $.post('/articles/div/api', {method: 'announcement', id, announcement: 1 - annstate}, (data, status) => {
+            if (data.error) {
+                mdui.snackbar(`错误：${data.error}`)
+            }
+            else {
+                mdui.snackbar('更新成功')
+                $(`#cgann-${id}`).prop('state', annstate ? 'no' : 'yes').text(annstate ? '启用公告' : '关闭公告')
+                $(`#ann-${id}`).text(annstate ? '' : '【公告】')
+            }
+        })
+    }
+
+    function rename_div(id) {
+        let content = $("#input").val()
+        if (content === '') {
+            mdui.snackbar('错误：分区名称不得为空')
+            return
+        }
+        $.post('/articles/div/api', {method: 'rename', id, name: content}, (data, status) => {
+            if (data.error) {
+                mdui.snackbar(`错误：${data.error}`)
+            }
+            else {
+                mdui.snackbar('更新成功')
+                $(`#name-${id}`).text(content)
+            }
+        })
+    }
+
+    function remove_div(id) {
+        $.post('/articles/div/api', {method: 'remove', id}, (data, status) => {
+            if (data.error) {
+                mdui.snackbar(`错误：${data.error}`)
+            }
+            else {
+                mdui.snackbar('删除成功')
+                $(`#div-${id}`).remove()
+                delete window.descs[id]
+            }
+        })
+    }
+</script>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">万能的输入框</label>
+	<input class="mdui-textfield-input" type="text" id="input" />
+</div>
+
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:create_div()">
+    创建分区
+</a>
+<br><br>
+
+<ul class="mdui-list" id="divides">
+    <% for (let i in divides) { let div = divides[i]; %>
+        <li class="mdui-list-item" id="div-<%= div.id %>">
+            <a class="mdui-list-item-content" href="/articles/div/<%= div.id %>">
+                <span id="name-<%= div.id %>">
+                    <%= div.name %>
+                </span>
+                <span style="color:#f00" id="ann-<%= div.id %>">
+                    <%= div.announcement ? "【公告】" : "" %>
+                </span>
+            </a>
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:show_desc(<%= div.id %>)">
+                加载描述
+            </a>&nbsp;&nbsp;
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:apply_desc(<%= div.id %>)">
+                更改描述
+            </a>&nbsp;&nbsp;
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="cgann-<%= div.id %>" state="<%= div.announcement ? 'yes' : 'no' %>" href="javascript:change_ann(<%= div.id %>)">
+                <%= div.announcement ? '关闭公告' : '启用公告' %>
+            </a>&nbsp;&nbsp;
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:rename_div(<%= div.id %>)">
+                重命名
+            </a>&nbsp;&nbsp;
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-red" <% if (div.id == 1) { %> disabled <% } else { %> href="javascript:remove_div(<%= div.id %>)" <% } %> >
+                删除
+            </a>
+        </li>
+    <% } %>
+</ul>

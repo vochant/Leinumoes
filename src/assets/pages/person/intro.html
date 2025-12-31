@@ -1,0 +1,41 @@
+<div class="markdown-body mdui-container">
+    <br>
+    <% if (typeof info.email !== 'undefined') { %>
+        <i class="fa-solid fa-envelope"></i> <strong>邮箱</strong> <a href="mailto:<%= info.email %>"><%= info.email %></a><br>
+    <% } %>
+    <% if (typeof info.phone !== 'undefined') { %>
+        <i class="fa-solid fa-phone"></i> <strong>电话号码</strong> <%= info.phone %><br>
+    <% } %>
+    <% if (typeof info.birth !== 'undefined') { %>
+        <i class="fa-solid fa-cake-candles"></i> <strong>生日</strong> <%= info.birth %><br>
+    <% } %>
+    <% if (typeof info.pronoun !== 'undefined') { %>
+        <i class="fa-solid fa-user"></i> <strong>人称代词</strong> <%= info.pronoun %><br>
+    <% } %>
+    <% if (typeof info.realname !== 'undefined') { %>
+        <i class="fa-solid fa-address-card"></i> <strong>真实姓名</strong> <%= info.realname %><br>
+    <% } %>
+    <% if (typeof info.gender !== 'undefined') { %>
+        <% if (info.gender === '男') { %>
+            <i class="fa-solid fa-mars"></i>
+        <% } else if (info.gender === '女') { %>
+            <i class="fa-solid fa-venus"></i>
+        <% } else { %>
+            <i class="fa-solid fa-transgender"></i>
+        <% } %>
+        <strong>性别</strong> <%= info.gender %><br>
+    <% } %>
+    <% if (typeof info.job !== 'undefined') { %>
+        <i class="fa-solid fa-building"></i> <strong>职业</strong> <%= info.job %><br>
+    <% } %>
+    <% if (typeof info.address !== 'undefined') { %>
+        <i class="fa-solid fa-location-dot"></i> <strong>住址</strong> <%= info.address %><br>
+    <% } %>
+    <% if (typeof info.url !== 'undefined') { %>
+        <i class="fa-solid fa-link"></i> <strong>个人网站</strong> <a href="<%= info.url %>"><%= info.url %></a><br>
+    <% } %>
+    <i class="fa-solid fa-square-plus"></i> <strong>创建时间</strong> <%= info.created_at %><br>
+    <br><div class="mdui-divider"></div><br>
+    <%- markdown.render(desc) %>
+    <br>
+</div>

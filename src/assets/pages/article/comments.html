@@ -1,0 +1,157 @@
+<% 
+    function getIndexes(total, current) {
+        let before = [], after = []
+        for (let i = 1; current - (i >> 1) > 1; i <<= 1) before.push(Math.max(1, current - i))
+        for (let i = 1; current + (i >> 1) < total; i <<= 1) after.push(Math.min(total, current + i))
+        return before.reverse().concat(current).concat(after)
+    }
+
+    let pages = Math.max(comments / 20, 1)
+    let indexes = getIndexes(pages, page)
+%>
+
+<% if (user.logged && !art.locked) { %>
+    <link rel="stylesheet" href="/file/css/markdown-palettes.css">
+    <script src="/file/js/markdown-palettes.min.js"></script>
+
+    <script>
+        window.reply_to = null
+        $(document).ready(() => {
+            window.markdownEditor = new MarkdownPalettes("#input-comment")
+            $("#post-comment").click(() => {
+                let data = {
+                    aid: <%= art.id %>,
+                    content: markdownEditor.content
+                }
+                if (window.reply_to) {
+                    data.reply = window.reply_to
+                    window.reply_to = null
+                    $('#reply-to').text('').attr('style', 'display:none')
+                }
+                if (!data.content) {
+                    mdui.snackbar('错误：评论内容不能为空')
+                    return
+                }
+                $.post('/articles/api_comment', data, (data, status) => {
+                    if (data.error) {
+                        mdui.snackbar(`错误：${data.error}`)
+                    } else {
+                        mdui.snackbar('评论成功！')
+                        location.reload()
+                    }
+                })
+            })
+        })
+
+        function set_reply(cid, floor) {
+            window.reply_to = cid
+            $('#reply-to').html(`
+            回复评论：${floor} 楼
+            <a href="javascript:clear_reply()">取消</a><br><br>
+            `).attr('style', '')
+            $('#input-comment').scrollIntoView()
+        }
+        
+        function clear_reply() {
+            window.reply_to = null
+            $('#reply-to').text('').attr('style', 'display:none')
+        }
+
+        function remove_comment(cid) {
+            mdui.confirm('确认要删除该评论吗？', () => {
+                $.post('/articles/api_remove_comment', { cid }, (data, status) => {
+                    if (data.error) {
+                        mdui.snackbar(`错误：${data.error}`)
+                    } else {
+                        mdui.snackbar('删除成功！')
+                        location.reload()
+                    }
+                })
+            }, () => {})
+        }
+    </script>
+<% } %>
+
+<div class="mdui-typo">
+    <hr>
+    <h1>评论 (<%= comments %>)</h1>
+</div>
+
+<% for (let i in currentPage) { %>
+    <% let comment = currentPage[i] %>
+    <div>
+        <div class="mdui-card-primary">
+            <a <% if (comment.user_name) { %>href="/user/<%= comment.sender %>"<% } %>>
+                <% if (comment.user_name) { %>
+                    <img height="60px" style="width:60px!important;position:absolute" class="mdui-img-circle mdui-img" src="/usericon/<%= comment.sender %>.png">
+                <% } %>
+            </a>
+            <div class="mdui-card-primary-title my-card-text">
+                <a style="text-decoration:none;color:black;" <% if (comment.user_name) { %>href="/user/<%= comment.sender %>"<% } %> >
+                    <%= comment.user_name || ('已注销用户' + (user.op ? ` (${comment.sender})` : '')) %>
+                    <% if (comment.user_tag) { %>
+                        <span class="user-tag"><%= comment.user_tag %></span>
+                    <% } %>
+                </a>
+            </div>
+            <div class="mdui-card-primary-subtitle my-card-text markdown-body" style="opacity:1!important">
+                <span style="opacity:0.6!important">
+                    <%= comment.floor %> 楼｜
+                    <%= comment.created_at %>
+                </span>
+                <% if (user.logged && !art.locked && !isBlocked(user.id, comment.sender)) { %> <a href="javascript:set_reply(<%= comment.id %>, <%= comment.floor %>)">回复</a> <% } %>
+                <% if (user.logged && checkCommGrant(user.id, comment.id)) { %> <a href="javascript:remove_comment(<%= comment.id %>)">删除</a> <% } %>
+            </div>
+            <% if (comment.reply_to) { %>
+            <div class="mdui-typo">
+                <blockquote>
+                    <% if (comment.rfloor) { %>
+                        &gt;&gt; 回复：<a href="<%= art.id %>?page=<%= floorToPage(comment.rfloor) %>"><%= comment.rfloor %> 楼</a>
+                    <% } else { %>
+                        &gt;&gt; 回复：【评论已删除】
+                    <% } %>
+                </blockquote>
+            </div>
+        <% } %>
+        </div>
+        <div class="markdown-body mdui-container">
+            <%- markdown.render(comment.content) %>
+        </div>
+        <div class="mdui-typo"><hr></div>
+    </div>
+<% } %>
+
+<br><br>
+
+<a class="mdui-btn mdui-btn-icon mdui-ripple" <% if (page == 1) { %>disabled<% } else { %>href="<%= art.id %>?page=<%= page - 1%>"<% } %> >
+	<i class="mdui-icon material-icons">chevron_left</i>
+</a>
+<% for (let i in indexes) { %>
+    <a class="mdui-btn mdui-btn-icon mdui-ripple<% if (indexes[i] == page) { %> mdui-color-theme-accent<% } %>" href="<%= art.id %>?page=<%= indexes[i] %>">
+        <small><%= indexes[i] %></small>
+    </a>
+<% } %>
+<a class="mdui-btn mdui-btn-icon mdui-ripple" <% if (page == pages) { %>disabled<% } else { %>href="<%= art.id %>?page=<%= page + 1%>"<% } %> >
+	<i class="mdui-icon material-icons">chevron_right</i>
+</a>
+
+<% if (user.logged) { %>
+    <br><br>
+
+    <div class="mdui-typo"><hr><h1>发表评论</h1></div>
+    <br>
+
+    <% if (art.locked) { %>
+        <div class="mdui-typo">
+            <strong>该主题已锁定，无法继续发表评论。</strong>
+        </div>
+    <% } else { %>
+        <span id="reply-to" class="markdown-body" style="display:none"></span>
+        <div id="editor-container" style="height: 320px;">
+            <div id="input-comment"></div>
+        </div><br>
+        <div class="mdui-float-right">
+            <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="post-comment">发表</a>
+        </div>
+    <% } %>
+<% } %>

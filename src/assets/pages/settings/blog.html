@@ -1,0 +1,74 @@
+<script>
+    function selectStylesheet() {
+        var file = source.files[0]
+		if (window.FileReader) {
+			var fr = new FileReader()
+			fr.onloadend = function(e) {
+				window.file = e.target.result
+			}
+			fr.readAsText(file)
+		}
+    }
+    function sendStylesheet() {
+        if (!window.file) {
+            mdui.snackbar('错误：未选择文件')
+            return
+        }
+		var obj = {file: window.file}
+		$.post("/settings/api_css", obj, (data, status) => {
+			if (data.error) {
+				mdui.snackbar(`错误：${data.error}`)
+			} else {
+                window.file = null
+				mdui.snackbar("更新成功！")
+			}
+		})
+	}
+    function emptyStylesheet() {
+		$.post("/settings/api_css", {file: null}, (data, status) => {
+			if (data.error) {
+				mdui.snackbar(`错误：${data.error}`)
+			} else {
+				mdui.snackbar("更新成功！")
+			}
+		})
+	}
+    $(document).ready(() => {
+        $("#update").click(() => {
+			$.post("/settings/api_blogname", {
+                value: $('#blogName').val()
+            }, (data, status) => {
+				if (data.error) mdui.snackbar(`错误：${data.error}`)
+				else mdui.snackbar("更新成功！")
+			})
+		})
+    })
+</script>
+
+<div class="mdui-typo">
+	<h1>设置</h1><br>
+	<a href="/settings/">基础信息</a> | <a href="/settings/social">社会信息</a> | <a href="/settings/security">安全设置</a> | 博客设置<br>
+</div>
+
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">博客名称</label>
+	<input class="mdui-textfield-input" type="tect" id="blogName" placeholder="<%= user.name %>的博客" value="<%= blogName %>"/>
+</div>
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="update">更新</a>
+
+<h2>自定义样式表</h2><br>
+
+如需使用自定义样式表，请作用于类 <code>custom-blog-typo</code>。<br>
+
+<div id="state">
+    <% if (stylesheet === null) { %>
+        <span style="color:#0f0">您正在使用自定义样式表！</span>
+    <% } else { %>
+        <span style="color:#f00">您未在使用自定义样式表！</span>
+    <% } %>
+</div>
+<br>
+
+<input type="file" name="file" accept="text/css" id="file" onchange="selectStylesheet(this);" /><br><br>
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:sendStylesheet()">上传</a>&nbsp;&nbsp;&nbsp;
+<a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" href="javascript:emptyStylesheet()">清空</a>

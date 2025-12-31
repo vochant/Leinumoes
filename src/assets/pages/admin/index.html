@@ -1,0 +1,39 @@
+<script>
+    $(document).ready(() => {
+		$("#replace").click(() => {
+			if ($("#uid").val() == "") {
+				$("#err").text("未选择目标用户！")
+				return
+			}
+			if (!/^[1-9][0-9]{0,}$/.test($("#uid").val())) {
+				$("#err").text("数字 ID 无效！")
+				return
+			}
+			$.post("/admin/custom_login", {user: $("#uid").val()}, (data, status) => {
+				if (data.error !== undefined) {
+					$("#err").text(data.error)
+				} else {
+					window.location.reload()
+				}
+			})
+		})
+	})
+</script>
+
+<div class="mdui-typo">
+	<h1>后台管理</h1>
+    <p>全部管理功能位于侧边栏中，请进入对应管理板块以执行操作。</p>
+    <% if (user.super) { %>
+        <p style="color: #0d0">您当前是超级管理员</p>
+    <% } else { %>
+        <p style="color: #0aa">您当前是普通管理员</p>
+    <% } %>
+    <hr>
+    <h4 class="article-title">快速审查</h4>
+    <div class="mdui-textfield">
+        <label class="mdui-textfield-label" for="uid">数字 ID</label>
+        <input class="mdui-textfield-input" type="text" id="uid"/>
+    </div>
+    <a class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200" id="replace">切换登录视角</a>
+    <div id="err" class="mdui-typo" style="color: #f00"></div>
+</div>

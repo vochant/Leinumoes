@@ -1,0 +1,52 @@
+<h1>
+    <%= div.name %>
+    <% if (div.desc != '') { %><br><small><%= div.desc %></small><% } %>
+</h1>
+
+<% 
+    function getIndexes(total, current) {
+        let before = [], after = []
+        for (let i = 1; current - (i >> 1) > 1; i <<= 1) before.push(Math.max(1, current - i))
+        for (let i = 1; current + (i >> 1) < total; i <<= 1) after.push(Math.min(total, current + i))
+        return before.reverse().concat(current).concat(after)
+    }
+
+    let pages = Math.max(articles / 20, 1)
+    let indexes = getIndexes(pages, page)
+%>
+
+<% if (user.logged && !muted && (!div.announcement || user.op)) { %>
+    <br>
+    <a href="/articles/new?div=<%= div.id %>" class="mdui-btn mdui-btn-raised mdui-ripple mdui-ripple-white mdui-color-theme-200">创建文章</a>
+    <br><br>
+<% } %>
+
+<br>
+
+<div class="markdown-body">
+    <hr>
+    <% for (let i in currentPage) { let item = currentPage[i]; %>
+        <a href="/articles/<%= item.id %>"><%= item.title %></a>
+        <i class="mdui-text-color-grey">from</i> <a href="/articles/div<%= div.id %>"><%= div.name %></a><br>
+        <i class="mdui-text-color-grey">by</i> <a href="/user/<%= item.author %>"><%= item.display_name %></a>
+        <span class="mdui-float-right">
+            <%= item.created_at %>, <strong style="color:<%= (item.vote > 0) ? 'green' : ((item.vote < 0) ? 'red' : 'gray')%>"><%= (item.vote > 0 ? '+' : '') + item.vote %></strong>,
+            <%= item.ncomments %> 条评论
+        </span>
+        <hr>
+    <% } %>
+</div>
+
+<br><br>
+
+<a class="mdui-btn mdui-btn-icon mdui-ripple" <% if (page == 1) { %>disabled<% } else { %>href="/articles/div/<%= div.id %>?page=<%= page - 1%>"<% } %> >
+	<i class="mdui-icon material-icons">chevron_left</i>
+</a>
+<% for (let i in indexes) { %>
+    <a class="mdui-btn mdui-btn-icon mdui-ripple<% if (indexes[i] == page) { %> mdui-color-theme-accent<% } %>" href="/articles/div/<%= div.id %>?page=<%= indexes[i] %>">
+        <small><%= indexes[i] %></small>
+    </a>
+<% } %>
+<a class="mdui-btn mdui-btn-icon mdui-ripple" <% if (page == pages) { %>disabled<% } else { %>href="/articles/div/<%= div.id %>?page=<%= page + 1%>"<% } %> >
+	<i class="mdui-icon material-icons">chevron_right</i>
+</a>
