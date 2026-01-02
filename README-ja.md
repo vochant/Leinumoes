@@ -51,6 +51,7 @@ ren config.json.in config.json
 - `port` サーバーリスニングポート
 - `announcement` お知らせセクション
 - `invite` 招待制
+- `no_guest` ゲストアクセス禁止、ログインを強制
 
 エラーコードとその表示名については、`errids.json` の対応するフィールドを変更してください。
 

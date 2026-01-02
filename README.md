@@ -51,6 +51,7 @@ For basic configuration, modify `config.json`. The field meanings are as follows
 - `port` Server listening port
 - `announcement` Announcement section
 - `invite` Invitation-only registration
+- `no_guest` Disable guest access, enforce login
 
 For error codes and their display names, modify the corresponding fields in `errids.json`.
 

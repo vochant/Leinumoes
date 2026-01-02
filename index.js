@@ -38,6 +38,13 @@ function freePath(path) {
     return matched
 }
 
+function freePathNoGuest(path) {
+    const fp = ['/docs', '/file', '/apple-touch-icon.png', '/favicon.ico', '/error', '/login', '/regist', '/userapi']
+    let matched = false
+    fp.forEach(x => { if (path.startsWith(x)) matched = true })
+    return matched
+}
+
 app.use("/file", Express.static(Path.join(Path.dirname(fileURLToPath(import.meta.url)), 'web')))
 app.use("/usericon", Express.static(Path.join(Path.dirname(fileURLToPath(import.meta.url)), 'data/usericon')))
 app.use("/groupicon", Express.static(Path.join(Path.dirname(fileURLToPath(import.meta.url)), 'data/groupicon')))
@@ -108,6 +115,10 @@ app.all(/.*/, async (req, res, next) => {
                 res.send(hypertext)
             })
         })
+        return
+    }
+    if (config.no_guest && !req.user.logged && !freePathNoGuest(req._parsedUrl.pathname)) {
+        res.redirect('/login')
         return
     }
     next()

@@ -51,6 +51,7 @@ ren config.json.in config.json
 - `port` 服务器监听端口
 - `announcement` 公告板块
 - `invite` 邀请制
+- `no_guest` 禁止游客访问，强制要求登录
 
 对于错误码及其显示名称，请更改 `errids.json` 对应字段。
 
