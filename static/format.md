@@ -482,7 +482,7 @@ $$\ce{Zn^2+  <=>[+ 2OH-][+ 2H+]  $\underset{\text{amphoteres Hydroxid}}{\ce{Zn(O
 😄 👍 🐱
 
 > [!NOTE]
-> 您可以使用如第一段 GFM (GitHub Flavored Markdown) 式的 Emoji，也可以使用如第二段 Unicode 中自带的 Emoji，但是前者会显示为 Twemoji (Twitter Emoji)，后者则依据您的平台使用的 Emoji 字体。如果希望最好的跨平台一致性和兼容性，那么使用 GFM 式的 Emoji 仍是您的最佳选择。
+> 您可以使用如第一段 Github 式的 Emoji，也可以使用如第二段 Unicode 中自带的 Emoji，但是前者会显示为 Twemoji (Twitter Emoji)，后者则依据您的平台使用的 Emoji 字体。如果希望最好的跨平台一致性和兼容性，那么使用 GitHub 式的 Emoji 仍是您的最佳选择。
 
 ## 17. 提示框
 
