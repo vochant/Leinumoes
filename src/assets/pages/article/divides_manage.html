@@ -4,13 +4,11 @@
 <br>
 
 <script>
-    window.descs = (function() {
-        let obj = {}
+    window.descs = {
         <% for (let i in divides) { let div = divides[i]; %>
-            <%- `obj[${div.id}] = ${JSON.stringify(div.desc)}` %>
+            "<%= div.id %>": <%- JSON.stringify(div.desc) %>,
         <% } %>
-        return obj
-    })()
+    }
 
     function create_div() {
         let title = $("#input").val()
