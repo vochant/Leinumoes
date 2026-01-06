@@ -76,7 +76,8 @@
             "mi gleki lo nu do klama lo tavlytergu'i be Leinumoes",
             "Chào mừng đến với Diễn đàn Leinumoes",
             "Ласкаво просимо на форум Leinumoes",
-            "Hontuvak o lepip o Leinumoes tésós",
+            "Hontuvaken lepip o Leinumoes tésós",
+            "Bontuvaiu lepo fusasie Leinumoesse",
             "Bem-vindo ao Fórum Leinumoes",
             "ยินดีต้อนรับสู่ฟอรั่ม Leinumoes",
             "Selamat datang ke Forum Leinumoes",
@@ -238,3 +239,8 @@
         </div>
     <% } %>
 </div>
+<% if (user.op) { %>
+    <br><span class="mdui-text-center mdui-center mdui-typo">
+        <a href="/articles/div/manage">管理分区</a>
+    </span><br>
+<% } %>

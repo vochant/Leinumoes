@@ -2,7 +2,8 @@ import Router from 'express'
 import { renderFile } from 'ejs'
 import { config } from '../framework/config.js'
 import { getPublic, hasUser } from '../db/user.js'
-import { getDesc, countFollower, countFollowing, follow, unfollow, block, unblock, listFollower, listFollowing, isFollowed, isBlocked } from '../db/user_extra.js'
+import { getDesc, countFollower, countFollowing, follow, unfollow, block, unblock, listFollower, listFollowing, isFollowed, isBlocked, getPerm } from '../db/user_extra.js'
+import { countArticlesByUser, getArticlesByUser } from '../db/article.js'
 import markdown from '../util/markdown.js'
 
 const router = Router()
@@ -57,10 +58,6 @@ router.get('/:uid', (req, res) => {
 })
 
 router.get('/:uid/articles', (req, res) => {
-    res.redirect(`/${req.params.uid}/articles/1`)
-})
-
-router.get('/:uid/articles/:page', (req, res) => {
     if (!/^\d+$/.test(req.params.uid) || !hasUser(parseInt(req.params.uid))) {
         res.redirect('/error/invalid_user')
         return
@@ -73,7 +70,27 @@ router.get('/:uid/articles/:page', (req, res) => {
         isFollowed,
         isBlocked
     }
-    renderFile("./src/assets/pages/person/articles.html", { uid }, (_err, _hypertext) => {
+    let muted = !req.user.logged || !getPerm(req.user.id, 'post')
+    let articles = countArticlesByUser(uid), pages = Math.max(1, Math.ceil(articles / 20))
+    let page
+    if (req.query.page) {
+        if (typeof req.query.page !== 'string' || !/^\d+$/.test(req.query.page)) {
+            res.redirect(`/div/${did}`)
+            return
+        }
+        page = parseInt(req.query.page)
+        if (page < 1) {
+            res.redirect(`/div/${did}`)
+            return
+        }
+        if (page > pages) {
+            res.redirect(`/div/${did}?page=${pages}`)
+            return
+        }
+    }
+    else page = 1
+    let currentPage = getArticlesByUser(uid, page)
+    renderFile("./src/assets/pages/person/articles.html", { uid, page, currentPage, info, muted, articles, user: req.user }, (_err, _hypertext) => {
         renderFile("./src/assets/pages/person/frame.html", { info, user: req.user, helper, page: _hypertext }, (_err2, _hypertext2) => {
             renderFile("./src/assets/layouts/layout.html", {
                 page: { title: info.displayName + "的文章" },

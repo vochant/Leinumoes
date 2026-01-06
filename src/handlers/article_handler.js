@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
     let pins = getPinned(1)
     let lats = getArticles(1)
     let divs = getDivides()
-    renderFile("./src/assets/pages/article/index.html", { divs, anns, pins, config, lats }, (_err, _hypertext) => {
+    renderFile("./src/assets/pages/article/index.html", { divs, anns, pins, config, lats, user: req.user }, (_err, _hypertext) => {
         renderFile("./src/assets/layouts/layout.html", {
             page: { title: '论坛' },
             config,
